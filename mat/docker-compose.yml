@@ -1,0 +1,63 @@
+# This compose file is compatible with Compose itself, it might need some
+# adjustments to run properly with stack.
+
+version: '3'
+
+networks:
+  proxy:
+    external: true
+
+services:
+
+  synapse:
+    image: docker.io/matrixdotorg/synapse:latest
+    # Since synapse does not retry to connect to the database, restart upon
+    # failure
+    restart: unless-stopped
+    # See the readme for a full documentation of the environment settings
+    environment:
+      - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
+    volumes:
+      # You may either store all the files in a local folder
+      - ./data:/data
+      # .. or you may split this between different storage points
+      # - ./files:/data
+      # - /path/to/ssd:/data/uploads
+      # - /path/to/large_hdd:/data/media
+    depends_on:
+      - db
+    # In order to expose Synapse, remove one of the following, you might for
+    # instance expose the TLS port directly:
+    networks:
+      - proxy
+    ports:
+      - 8448:8448/tcp
+    # ... or use a reverse proxy, here is an example for traefik:
+    labels:
+      # The following lines are valid for Traefik version 1.x:
+      # Alternatively, for Traefik version 2.0:
+      - traefik.enable=true
+      - traefik.http.routers.https-synapse.entryPoints=websecure
+      - traefik.http.routers.https-synapse.rule=Host(`matrix.alkemata.com`)
+      #- traefik.http.routers.https-synapse.service=synapse
+      - traefik.http.routers.https-synapse.tls=true
+      #- traefik.http.services.synapse.loadbalancer.server.port=8008
+      - traefik.http.routers.https-synapse.tls.certResolver=leresolver
+
+  db:
+    env_file: cred.env
+    image: docker.io/postgres:10-alpine
+    networks:
+      - proxy
+    # Change that password, of course!
+    environment:
+      - POSTGRES_USER=${login}
+      - POSTGRES_PASSWORD=${password}
+      # ensure the database gets created correctly
+      # https://github.com/matrix-org/synapse/blob/master/docs/postgres.md#set-up-database
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      # You may store the database tables in a local folder..
+      - ./schemas:/var/lib/postgresql/data
+      # .. or store them on some high performance storage for better results
+      # - /path/to/ssd/storage:/var/lib/postgresql/data
