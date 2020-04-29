@@ -1,0 +1,35 @@
+# This compose file is compatible with Compose itself, it might need some
+# adjustments to run properly with stack.
+
+version: '3'
+
+
+services:
+
+  riot:
+    image: vectorim/riot-web
+    # Since synapse does not retry to connect to the database, restart upon
+    # failure
+    restart: unless-stopped
+    # See the readme for a full documentation of the environment settings
+    volumes:
+      # You may either store all the files in a local folder
+      #- ./riot-web:/usr/share/nginx/html/
+      - ./config/config.json:/app/config.json
+    ports:
+      - 8080:80
+    networks:
+      - proxy
+    # ... or use a reverse proxy, here is an example for traefik:
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.https-riot.entryPoints=websecure
+      - traefik.http.routers.https-riot.rule=Host(`alkemata.com`)
+      #- traefik.http.routers.https-synapse.service=synapse
+      - traefik.http.routers.https-riot.tls=true
+      - traefik.http.routers.https-riot.tls.certResolver=leresolver
+      - traefik.docker.network=proxy
+
+networks:
+        proxy:
+                external: true

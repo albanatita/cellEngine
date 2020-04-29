@@ -234,6 +234,10 @@ listeners:
   #  type: manhole
 
 
+  - type: metrics
+    port: 9000
+    bind_addresses:
+      - '0.0.0.0'
 ## Homeserver blocking ##
 
 # How to reach the server admin, used in ResourceLimitError
@@ -1049,8 +1053,8 @@ account_threepid_delegates:
 # Users who register on this homeserver will automatically be joined
 # to these rooms
 #
-#auto_join_rooms:
-#  - "#example:example.com"
+auto_join_rooms:
+  - "#welcome:matrix.alkemata.com"
 
 # Where auto_join_rooms are specified, setting this flag ensures that the
 # the rooms exist by creating them when the first user on the
@@ -1058,14 +1062,14 @@ account_threepid_delegates:
 # Setting to false means that if the rooms are not manually created,
 # users cannot be auto-joined since they do not exist.
 #
-#autocreate_auto_join_rooms: true
+autocreate_auto_join_rooms: true
 
 
 ## Metrics ###
 
 # Enable collection and rendering of performance metrics
 #
-#enable_metrics: false
+enable_metrics: true
 
 # Enable sentry integration
 # NOTE: While attempts are made to ensure that the logs don't contain

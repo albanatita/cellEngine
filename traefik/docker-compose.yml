@@ -6,12 +6,13 @@ services:
     command:
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
+      - --entrypoints.websecure2.address=:8448
       - --providers.docker
       - --api
       - --accesslog=true
       - --metrics
       - --metrics.prometheus.buckets=0.1,0.3,1.2,5.0
-      - --certificatesresolvers.leresolver.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.leresolver.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
       - --certificatesresolvers.leresolver.acme.email=info@alkemata.com
       - --certificatesresolvers.leresolver.acme.storage=/acme.json
       - --certificatesresolvers.leresolver.acme.tlschallenge=true
@@ -21,12 +22,13 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "8448:8448"
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock:ro"
-      - "./acme.json:/acme.json"
+      - "$PWD/acme.json:/acme.json"
     labels:
       # Dashboard
-      - "traefik.http.routers.traefik.rule=Host(`alkemata.com`)"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.alkemata.com`)"
      # - "traefik.http.routers.traefik.middlewares=traefik-stripprefix"
      # - "traefik.http.middlewares.traefik-stripprefix.stripprefix.prefixes=/traefik"
       - "traefik.http.routers.traefik.service=api@internal"

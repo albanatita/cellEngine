@@ -31,18 +31,19 @@ services:
     networks:
       - proxy
     ports:
-      - 8448:8448/tcp
+        #- 8448:8448/tcp
+        - 9000:9000
     # ... or use a reverse proxy, here is an example for traefik:
     labels:
       # The following lines are valid for Traefik version 1.x:
       # Alternatively, for Traefik version 2.0:
       - traefik.enable=true
-      - traefik.http.routers.https-synapse.entryPoints=websecure
+      - traefik.http.routers.https-synapse.entryPoints=websecure,websecure2
+      - traefik.http.routers.https-synapse.tls.certresolver=leresolver
       - traefik.http.routers.https-synapse.rule=Host(`matrix.alkemata.com`)
-      #- traefik.http.routers.https-synapse.service=synapse
       - traefik.http.routers.https-synapse.tls=true
-      #- traefik.http.services.synapse.loadbalancer.server.port=8008
-      - traefik.http.routers.https-synapse.tls.certResolver=leresolver
+      - traefik.http.routers.https-synapse.service=synapse
+      - traefik.http.services.synapse.loadbalancer.server.port=8008
 
   db:
     env_file: cred.env
